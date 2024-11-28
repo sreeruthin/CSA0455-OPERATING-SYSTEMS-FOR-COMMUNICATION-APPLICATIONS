@@ -1,0 +1,99 @@
+#include<stdio.h>
+
+int main() {
+    int at[10], bt[10], pr[10];  // Arrival time, burst time, process ids
+    int n, i, j, temp, time = 0, count, over = 0, sum_wait = 0, sum_turnaround = 0, start;
+    float avgwait, avgturn;
+
+    // Taking the number of processes as input
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    // Taking Arrival time and Burst time as input
+    for(i = 0; i < n; i++) {
+        printf("Enter the arrival time and execution time for process %d: ", i + 1);
+        scanf("%d %d", &at[i], &bt[i]);
+        pr[i] = i + 1;  // Assign process IDs
+    }
+
+    // Sorting processes by Arrival time
+    for(i = 0; i < n - 1; i++) {
+        for(j = i + 1; j < n; j++) {
+            if(at[i] > at[j]) {
+                // Swap arrival times
+                temp = at[i];
+                at[i] = at[j];
+                at[j] = temp;
+                
+                // Swap burst times
+                temp = bt[i];
+                bt[i] = bt[j];
+                bt[j] = temp;
+                
+                // Swap process IDs
+                temp = pr[i];
+                pr[i] = pr[j];
+                pr[j] = temp;
+            }
+        }
+    }
+
+    printf("\n\nProcess\t| Arrival time\t| Execution time\t| Start time\t| End time\t| Waiting time\t| Turnaround time\n\n");
+
+    // Process execution and calculation of times
+    while(over < n) {
+        count = 0;
+
+        // Find all processes that have arrived by the current time
+        for(i = over; i < n; i++) {
+            if(at[i] <= time)
+                count++;
+            else
+                break;
+        }
+
+        // If multiple processes have arrived, perform SJF on the burst times
+        if(count > 1) {
+            for(i = over; i < over + count - 1; i++) {
+                for(j = i + 1; j < over + count; j++) {
+                    if(bt[i] > bt[j]) {
+                        // Swap burst times
+                        temp = bt[i];
+                        bt[i] = bt[j];
+                        bt[j] = temp;
+
+                        // Swap process IDs
+                        temp = pr[i];
+                        pr[i] = pr[j];
+                        pr[j] = temp;
+
+                        // Swap arrival times
+                        temp = at[i];
+                        at[i] = at[j];
+                        at[j] = temp;
+                    }
+                }
+            }
+        }
+
+        // Calculate start time, end time, waiting time, and turnaround time
+        start = time;
+        time += bt[over];
+        printf("p[%d]\t|\t%d\t|\t%d\t|\t%d\t|\t%d\t|\t%d\t|\t%d\n", pr[over], at[over], bt[over], start, time, time - at[over] - bt[over], time - at[over]);
+        
+        // Accumulate waiting time and turnaround time
+        sum_wait += time - at[over] - bt[over];
+        sum_turnaround += time - at[over];
+        
+        over++;
+    }
+
+    // Calculate and display average waiting and turnaround times
+    avgwait = (float)sum_wait / (float)n;
+    avgturn = (float)sum_turnaround / (float)n;
+
+    printf("\nAverage waiting time is: %f\n", avgwait);
+    printf("Average turnaround time is: %f\n", avgturn);
+
+    return 0;
+}
