@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <direct.h>  // For _mkdir() on Windows
+
+int main() {
+    // Define the main directory, subdirectory, and file name
+    char mainDirectory[] = "C:/Users/itssk/OneDrive/Desktop";
+    char subDirectory[] = "os";
+    char fileName[] = "example.txt";
+    char filePath[200];
+    char mainDirPath[200];
+
+    // Construct the main directory path with subdirectory
+    snprintf(mainDirPath, sizeof(mainDirPath), "%s/%s/", mainDirectory, subDirectory);
+
+    // Construct the full file path
+    snprintf(filePath, sizeof(filePath), "%s%s", mainDirPath, fileName);
+
+    // Check if the directory exists, and create it if not
+    if (_mkdir(mainDirPath) != 0) {
+        if (errno != EEXIST) { // If it's not the error code for existing directory
+            perror("Error creating directory");
+            return 1;
+        }
+    }
+
+    // Open the file for writing
+    FILE *file = fopen(filePath, "w");
+
+    if (file == NULL) {
+        printf("Error creating file.\n");
+        return 1;
+    }
+
+    // Write content to the file
+    fprintf(file, "This is an example file content.");
+    printf("File created successfully: %s\n", filePath);
+
+    // Close the file
+    fclose(file);
+
+    return 0;
+}
