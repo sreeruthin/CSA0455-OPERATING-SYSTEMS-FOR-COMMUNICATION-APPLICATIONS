@@ -1,0 +1,98 @@
+#include <stdio.h>
+
+void bestfit(int mp[], int p[], int m, int n) {
+    int j = 0;
+    for (int i = 0; i < n; i++) {
+        if (mp[i] >= p[j]) {  // Ensure the partition is large enough
+            printf("\nProcess %d of size %d fits in memory partition %d", p[j], p[j], mp[i]);
+            mp[i] -= p[j];  // Reduce the partition size
+            j++;  // Move to next process
+        }
+    }
+
+    for (int i = j; i < m; i++) {
+        printf("\nProcess %d must wait for memory", p[i]);
+    }
+}
+
+void rsort(int a[], int n) {
+    // Sort in reverse order (for Worst Fit)
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (a[i] < a[j]) {
+                int temp = a[i];
+                a[i] = a[j];
+                a[j] = temp;
+            }
+        }
+    }
+}
+
+void sort(int a[], int n) {
+    // Sort in ascending order (for First Fit and Best Fit)
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (a[i] > a[j]) {
+                int temp = a[i];
+                a[i] = a[j];
+                a[j] = temp;
+            }
+        }
+    }
+}
+
+void firstfit(int mp[], int p[], int m, int n) {
+    sort(mp, n);  // Sort memory partitions in ascending order
+    sort(p, m);   // Sort processes in ascending order
+    bestfit(mp, p, m, n);
+}
+
+void worstfit(int mp[], int p[], int m, int n) {
+    rsort(mp, n);  // Sort memory partitions in descending order for Worst Fit
+    sort(p, m);    // Sort processes in ascending order
+    bestfit(mp, p, m, n);
+}
+
+int main() {
+    int m, n, mp[20], p[20], ch;
+    
+    // Read number of memory partitions and processes
+    printf("Number of memory partitions: ");
+    scanf("%d", &n);
+    printf("Number of processes: ");
+    scanf("%d", &m);
+    
+    // Read memory partitions
+    printf("Enter the memory partitions:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &mp[i]);
+    }
+    
+    // Read process sizes
+    printf("Enter process sizes:\n");
+    for (int i = 0; i < m; i++) {
+        scanf("%d", &p[i]);
+    }
+
+    // Show the options for the user
+    printf("1. First Fit\t2. Best Fit\t3. Worst Fit\nEnter your choice: ");
+    scanf("%d", &ch);
+    
+    // Execute the selected memory allocation strategy
+    switch (ch) {
+        case 1:
+            firstfit(mp, p, m, n);
+            break;
+        case 2:
+            bestfit(mp, p, m, n);
+            break;
+        case 3:
+            worstfit(mp, p, m, n);
+            break;
+        default:
+            printf("Invalid choice\n");
+            break;
+    }
+
+    return 0;
+}
