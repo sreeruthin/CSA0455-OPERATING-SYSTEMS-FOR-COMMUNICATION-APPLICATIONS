@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Employee {
+    int empId;
+    char empName[50];
+    float empSalary;
+};
+
+int main() {
+    FILE *filePtr;
+    struct Employee emp;
+    
+    // Open the file in binary read/write mode. Create it if it doesn't exist.
+    filePtr = fopen("employee.dat", "rb+");
+    if (filePtr == NULL) {
+        filePtr = fopen("employee.dat", "wb+"); // Create the file if it doesn't exist
+        if (filePtr == NULL) {
+            printf("Error creating the file.\n");
+            return 1;
+        }
+    }
+
+    int choice;
+    do {
+        printf("\nEmployee Database Menu:\n");
+        printf("1. Add Employee\n");
+        printf("2. Display Employee Details\n");
+        printf("3. Update Employee Details\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter Employee ID: ");
+                scanf("%d", &emp.empId);
+                printf("Enter Employee Name: ");
+                scanf("%49s", emp.empName);  // Limit the input size
+                printf("Enter Employee Salary: ");
+                scanf("%f", &emp.empSalary);
+
+                // Move to the position where the employee record should be stored
+                fseek(filePtr, (emp.empId - 1) * sizeof(struct Employee), SEEK_SET);
+
+                // Write the employee details to the file
+                if (fwrite(&emp, sizeof(struct Employee), 1, filePtr) != 1) {
+                    printf("Error writing employee details to file.\n");
+                } else {
+                    printf("Employee details added successfully.\n");
+                }
+                break;
+
+            case 2:
+                printf("Enter Employee ID to display: ");
+                scanf("%d", &emp.empId);
+                
+                // Seek to the employee's record position
+                fseek(filePtr, (emp.empId - 1) * sizeof(struct Employee), SEEK_SET);
+
+                // Read employee details from file
+                if (fread(&emp, sizeof(struct Employee), 1, filePtr) != 1) {
+                    printf("Error reading employee details from file.\n");
+                } else {
+                    printf("Employee ID: %d\n", emp.empId);
+                    printf("Employee Name: %s\n", emp.empName);
+                    printf("Employee Salary: %.2f\n", emp.empSalary);
+                }
+                break;
+
+            case 3:
+                printf("Enter Employee ID to update: ");
+                scanf("%d", &emp.empId);
+                
+                // Seek to the employee's record position
+                fseek(filePtr, (emp.empId - 1) * sizeof(struct Employee), SEEK_SET);
+
+                // Read employee details to update
+                if (fread(&emp, sizeof(struct Employee), 1, filePtr) != 1) {
+                    printf("Error reading employee details from file.\n");
+                } else {
+                    printf("Enter Employee Name: ");
+                    scanf("%49s", emp.empName);  // Limit the input size
+                    printf("Enter Employee Salary: ");
+                    scanf("%f", &emp.empSalary);
+
+                    // Seek to the same position and overwrite the data
+                    fseek(filePtr, (emp.empId - 1) * sizeof(struct Employee), SEEK_SET);
+
+                    // Write the updated employee details to file
+                    if (fwrite(&emp, sizeof(struct Employee), 1, filePtr) != 1) {
+                        printf("Error updating employee details in file.\n");
+                    } else {
+                        printf("Employee details updated successfully.\n");
+                    }
+                }
+                break;
+
+            case 4:
+                printf("Exiting...\n");
+                break;
+
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 4);
+
+    fclose(filePtr);
+    return 0;
+}
